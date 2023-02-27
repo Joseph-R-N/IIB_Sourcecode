@@ -1,0 +1,29 @@
+name: bar_file_compile
+
+on:
+  workflow_dispatch:
+    inputs:
+      flow_name:
+        type: string
+        required: true
+        description: 'Enter the Application Name for Bar file Creation'
+
+jobs:
+  checkout_SCM:
+   runs-on: [iibtest-01]
+   steps:
+     - name: test_login
+       run: |
+         echo "hostname of the VM is: $HOSTNAME"
+     
+     - name: Checkout
+       uses: actions/checkout@v1
+        
+     - name: List_Dir_After_Checkout
+       run: |
+         pwd
+         ls -alrt
+         echo "The GitHub Repo Name is: ${{ github.event.repository.name }}"
+         echo "The GitHub Repo Name is: ${GITHUB_REPOSITORY}"
+         echo "The selected input variable is: ${{ github.event.inputs.flow_name }}"
+         echo "The Branch info: ${GITHUB_REF}"

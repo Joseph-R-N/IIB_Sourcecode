@@ -27,3 +27,5 @@ jobs:
          echo "The GitHub Repo Name is: ${GITHUB_REPOSITORY}"
          echo "The selected input variable is: ${{ github.event.inputs.flow_name }}"
          echo "The Branch info: ${GITHUB_REF}"
+         echo "The Branch info: ${GITHUB_REF_NAME}"
+         echo "The Branch info: ${{ github.ref_name }}"

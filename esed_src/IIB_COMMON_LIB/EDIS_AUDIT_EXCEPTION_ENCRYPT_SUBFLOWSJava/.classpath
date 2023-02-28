@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="com.ibm.etools.mft.uri.classpath.MBProjectReference"/>
+	<classpathentry kind="lib" path="C:/Program Files/IBM/IIB/10.0.0.17/tools/plugins/com.ibm.etools.mft.jcn_10.0.0.17/javacompute.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/IBM/IIB/10.0.0.17/tools/plugins/com.ibm.etools.mft.jcn_10.0.0.17/jplugin2.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/IBM/IIB/10.0.0.17/tools/plugins/com.ibm.etools.mft.jcn_10.0.0.17/plugin.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

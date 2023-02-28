@@ -1,0 +1,253 @@
+BROKER SCHEMA com.abs.gl.journalentry
+
+/* --------------------------------------------------------------------------------------------
+APPLICATION ID : ESED
+INTERFACE NAME : ESED_JournalEntry_GL_FL_8_Publisher
+FLOW NAME      : ESED_JournalEntryXML_GL_FL_8_Publisher 
+DESCRIPTION    : PRODUCER :JournalEntry from GL - Fuel Tax Accrual TO Kafka IN CANONICAL FORMAT
+AUTHOR         : TCS
+CREATED DT     : 23/Nov/2020
+-- ---------------------------------------------------------------------------------------------
+Program History
+Project Drop 	Version Change Owner Date 			Description
+------- ------- ------- ------------ ----------- 	-------------
+EDIS 			16.0 	RPIMP01 	 23/Nov/2020 	Initial Draft 
+-- --------------------------------------------------------------------------------------------*/
+
+CREATE COMPUTE MODULE SF_ESED_JournalEntryXML_GL_FL_8_Publisher_Compute
+	DECLARE sysEnvCd EXTERNAL CHARACTER;
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		IF (InputLocalEnvironment.File.IsEmpty) THEN
+			SET Environment.Variables.exception = 'ESED01: Empty File Input: Source sent empty file as an Input';
+			THROW USER EXCEPTION VALUES
+				(Environment.Variables.exception||'-'||Environment.Variables.Transaction_Id);
+		END IF;
+		
+		DECLARE infilename CHARACTER;
+		SET infilename = InputLocalEnvironment.File.Name;
+		
+		DECLARE Abs NAMESPACE
+			'http://collab.safeway.com/it/architecture/info/default.aspx';
+		SET OutputRoot.Properties.CodedCharSetId = '1208';
+		DECLARE cmmCount INTEGER 0;
+		--Input Declaratins end here
+		DECLARE inRootRef REFERENCE TO InputRoot.DFDL.JournalEntryData;
+		DECLARE inRefMainRecord REFERENCE TO inRootRef.JIFINPUTREC;
+		--DECLARE LineNBR integer 0; --ExpectedMessageCnt_MessageSequenceNbr_Change
+		DECLARE StrLineNMBR CHARACTER '';
+		DELETE FIELD Environment.Variables.MISC_DATA;
+		DELETE FIELD Environment.Variables.Exception;
+		DECLARE ExpCount INTEGER 1; -- Count for exception msg
+		DELETE FIELD Environment.Variables.InvException;
+		--ExpectedMessageCnt_MessageSequenceNbr_Change STARTS HERE
+		--Spliting logic starts here
+		DECLARE LineNBR,MessageSeqNbr, k,fileCount INTEGER 0; 
+		 --Logic to implement the ExpectedMessageCnt nd MessageSequenceNbr
+		 DECLARE StrLineNmbr CHARACTER '';
+		 DECLARE vr,MessageCnt,seqNo CHARACTER;
+		 IF (CONTAINS(Environment.Variables.Transaction_Id, 'SPLIT')) THEN
+			   	 SET vr = SUBSTRING(Environment.Variables.Transaction_Id AFTER 'SPLIT');
+			   	 SET fileCount = LENGTH(SUBSTRING(vr BEFORE '_'));
+			   	 SET MessageCnt = SUBSTRING(vr FROM 1 FOR fileCount);
+			   	 SET seqNo = SUBSTRING(vr BEFORE '.');
+			   	 SET seqNo  = SUBSTRING(seqNo AFTER '_');
+		 ELSE
+				 SET MessageCnt = CARDINALITY(inRootRef.JIFINPUTREC[]);--FOR EVERY CODE THIS WILL VARY AS PER THE INPUT VARIABLE COMING FROM MESSAGE SET
+				 SET MessageSeqNbr  = 0;
+		 END IF;	
+	    
+		IF (CONTAINS(Environment.Variables.Transaction_Id, 'SPLIT')) THEN
+	 	 IF (seqNo = '1') THEN 
+		   		SET MessageSeqNbr  = 0;
+	 	 ELSE	
+	 	 	    SET k = CAST(seqNo AS INTEGER);
+	 			SET MessageSeqNbr  = (k-1)*100000;
+	 	 END IF;
+		END IF;
+	 	--ExpectedMessageCnt_MessageSequenceNbr_Change ENDS HERE
+		inCMMLoop : WHILE LASTMOVE(inRefMainRecord) DO
+			BEGIN 
+			SET LineNBR = LineNBR+1; -- To count and store the record # on input file
+			SET StrLineNMBR = (SUBSTRING('0000000' from 1 for (7 - LENGTH(CAST(LineNBR AS CHARACTER)))) || CAST(LineNBR AS CHARACTER));
+			DELETE FIELD OutputRoot.XMLNSC.GetJournalEntry;
+			CREATE FIELD OutputRoot.XMLNSC.GetJournalEntry;
+			DECLARE outref REFERENCE TO OutputRoot.XMLNSC.GetJournalEntry;
+			SET OutputRoot.XMLNSC.GetJournalEntry.
+			(XMLNSC.NamespaceDecl)xmlns:Abs=Abs;
+
+			SET OutputRoot.XMLNSC.(XMLNSC.XmlDeclaration)*.
+			(XMLNSC.Attribute)Version = '1.0';
+			SET OutputRoot.XMLNSC.(XMLNSC.XmlDeclaration)*.
+			(XMLNSC.Attribute)Encoding = 'UTF-8';
+
+			--Create field DocumentData
+			CREATE FIELD outref.DocumentData;
+			DECLARE outrefData REFERENCE TO outref.DocumentData;
+			
+			-- Map Document field for DHID CMM GetJournalEntry
+			
+			CREATE FIELD outrefData.Document;
+			DECLARE outrefDoc REFERENCE TO outrefData.Document;
+
+			SET outrefDoc.(XMLNSC.Attribute)ReleaseId = '16.0';
+		    SET outrefDoc.(XMLNSC.Attribute)VersionId = '2.6';
+			SET outrefDoc.(XMLNSC.Attribute)SystemEnvironmentCd = sysEnvCd;
+			SET outrefDoc.Abs:DocumentID = UUIDASCHAR;--ExpectedMessageCnt_MessageSequenceNbr_Change STARTS HERE
+			DECLARE dotPos INTEGER POSITION('.' IN Environment.Variables.Transaction_Id);
+			DECLARE hyphenPos INTEGER POSITION('_' IN Environment.Variables.Transaction_Id 
+				FROM (POSITION('.' IN Environment.Variables.Transaction_Id)));
+			IF CONTAINS (Environment.Variables.Transaction_Id, 'SPLIT') THEN
+				--JE_JIF_FSM_20200929175951_SPLIT350000_1.dat_20201005063935870593 
+				DECLARE total INTEGER POSITION('SPLIT' IN Environment.Variables.Transaction_Id);
+				SET outrefDoc.Abs:AlternateDocumentID = SUBSTRING(Environment.Variables.Transaction_Id FROM 1 FOR total-2)
+					||SUBSTRING(Environment.Variables.Transaction_Id FROM dotPos FOR hyphenPos-dotPos);
+			ELSE
+				--JE_JIF_FSM_20200929175951.dat_20201005063935870593
+				SET outrefDoc.Abs:AlternateDocumentID = Environment.Variables.Transaction_Id;
+			END IF;
+			--ExpectedMessageCnt_MessageSequenceNbr_Change ENDS HERE
+			SET outrefDoc.Abs:InboundOutboundInd = 'I'; 
+			IF CONTAINS(infilename, 'JE_GTR_FL8_AI_UW_GLTRANSREL') THEN
+				SET outrefDoc.Abs:DocumentNm = 'Journal Entry - UWARE';
+			ELSE
+				SET outrefDoc.Abs:DocumentNm = 'Journal Entry - FT';
+			END IF;
+			DECLARE curTime CHAR '';
+			SET curTime = REPLACE(CAST(CURRENT_TIMESTAMP AS CHAR FORMAT 'yyyy-MM-dd HH:mm:ss.SSSSSS'),' ','T');
+			SET outrefDoc.Abs:CreationDt = SUBSTRING(curTime FROM 1 FOR (LENGTH(curTime)-3))||'Z';
+			IF CONTAINS(infilename, 'JE_GTR_FL8_AI_UW_GLTRANSREL') THEN
+				SET outrefDoc.Abs:Description = 'Journal Entry - UWare File';
+			ELSE
+				SET outrefDoc.Abs:Description = 'Journal Entry - FT File';
+			END IF;
+			IF CONTAINS(infilename, 'JE_GTR_FL8_AI_UW_GLTRANSREL') THEN
+				SET outrefDoc.Abs:SourceApplicationCd = 'GL Uware';
+			ELSE
+				SET outrefDoc.Abs:SourceApplicationCd = 'GL FTT';
+			END IF;
+			SET outrefDoc.Abs:TargetApplicationCd = 'EDIS';
+			SET outrefDoc.Abs:InternalFileTransferInd = 'Y';
+			SET outrefDoc.Abs:ExternalTargetInd = 'I';
+			--ExpectedMessageCnt_MessageSequenceNbr_Change STARTS HERE
+			 --Logic to implement the ExpectedMessageCnt nd MessageSequenceNbr
+			SET MessageSeqNbr = MessageSeqNbr +1;
+			SET outrefDoc.Abs:MessageSequenceNbr = MessageSeqNbr;
+			SET outrefDoc.Abs:ExpectedMessageCnt =  MessageCnt; 
+			--ExpectedMessageCnt_MessageSequenceNbr_Change ENDS HERE
+			SET outrefDoc.Abs:DataClassification.Abs:DataClassificationLevel.Abs:Code = 'Internal';
+			SET outrefDoc.Abs:DataClassification.Abs:BusinessSensitivityLevel.Abs:Code = 'Low';
+			SET outrefDoc.Abs:DataClassification.Abs:PHIdataInd = 'N';
+			SET outrefDoc.Abs:DataClassification.Abs:PCIdataInd = 'N';
+			SET outrefDoc.Abs:DataClassification.Abs:PIIdataInd = 'N';				
+			--Map DocumentAction field for DHID CMM GetJournalEntry
+			CREATE FIELD outrefData.DocumentAction;
+			DECLARE outrefDocAct REFERENCE TO outrefData.DocumentAction;
+
+			SET outrefDocAct.Abs:ActionTypeCd = 'INSERT';
+			SET outrefDocAct.Abs:RecordTypeCd = 'NEW';
+			
+			--Map JournalEntryData field for DHID CMM GetJournalEntry
+			CREATE FIELD outref.JournalEntryData;
+			DECLARE outrefJEData REFERENCE TO outref.JournalEntryData;
+			
+			SET outrefJEData.Abs:RunGroupId = inRefMainRecord.RunGroup;
+			SET outrefJEData.Abs:SequenceNbr = inRefMainRecord.Seq_Number;
+			SET outrefJEData.Abs:OldAccountId = inRefMainRecord.oldAccrNbr;
+			SET outrefJEData.Abs:OldCompanyId = inRefMainRecord.oldCompany;
+			SET outrefJEData.Abs:CompanyId = inRefMainRecord.Company ; 
+			SET outrefJEData.Abs:JournalEntrySource.Abs:Code = inRefMainRecord.SourceCode ;
+			SET outrefJEData.Abs:JournalEntrySource.Abs:Description = inRefMainRecord.Description ;
+			SET outrefJEData.Abs:ReferenceTxt = COALESCE(inRefMainRecord.Reference,'');
+			SET outrefJEData.Abs:GLSystem.Abs:Code = inRefMainRecord.System;
+			SET outrefJEData.Abs:JournalEntryCreationDt = CAST(inRefMainRecord.Date AS DATE FORMAT 'yyyyMMdd');
+			SET outrefJEData.Abs:PostingDt = CAST(inRefMainRecord.PostingDate AS DATE FORMAT 'yyyyMMdd');
+			SET outrefJEData.Abs:EffectiveDt = CAST(inRefMainRecord.EffectDate AS DATE FORMAT 'yyyyMMdd');
+			SET outrefJEData.Abs:Program.Abs:Code = inRefMainRecord.ProgramCode ;
+			SET outrefJEData.Abs:AutoReverseInd = inRefMainRecord.autoRev ;
+			SET outrefJEData.Abs:Activity.Abs:Code = inRefMainRecord.Activity ;
+			SET outrefJEData.Abs:AccountCategory.Abs:Code = inRefMainRecord.Acct_Category ;
+			SET outrefJEData.Abs:DocumentNbr = inRefMainRecord.runGroup2; 
+			SET outrefJEData.Abs:JournalBookNbr = inRefMainRecord.JRNLBookNbr ;
+			SET outrefJEData.Abs:AdditionalInfo[1].Abs:Description = inRefMainRecord.MX_VALUE1;
+			SET outrefJEData.Abs:AdditionalInfo[2].Abs:Description = inRefMainRecord.MX_VALUE2;
+			SET outrefJEData.Abs:AdditionalInfo[3].Abs:Description = inRefMainRecord.MX_VALUE3;
+			SET outrefJEData.Abs:JournalBookSequenceNbr = COALESCE(TRIM(inRefMainRecord.JBK_SEQ_NBR),'0') ;
+			SET outrefJEData.Abs:NegativeAdjustmentInd = inRefMainRecord.NEGATIVE_ADJ ;
+			SET outrefJEData.Abs:UnitAmt.Abs:TransactionAmt = COALESCE(inRefMainRecord.UnitsAmt,'0');
+			SET outrefJEData.Abs:UnitAmt.Abs:CurrencyCd = inRefMainRecord.CurrencyCode ;
+			
+			DECLARE tran_amt CHARACTER '';
+			IF SUBSTRING(inRefMainRecord.TranAmount FROM LENGTH(inRefMainRecord.TranAmount) FOR 1) = '-' THEN
+				SET tran_amt = SUBSTRING(inRefMainRecord.TranAmount FROM LENGTH(inRefMainRecord.TranAmount) FOR 1)||
+					SUBSTRING(inRefMainRecord.TranAmount FROM 1 FOR LENGTH(inRefMainRecord.TranAmount)-1);
+			ELSE
+				SET tran_amt = COALESCE(inRefMainRecord.TranAmount,'0');
+			END IF; 
+			SET outrefJEData.Abs:TransactionAmt.Abs:TransactionAmt = COALESCE(tran_amt,'0');
+			
+			SET outrefJEData.Abs:TransactionAmt.Abs:CurrencyCd = inRefMainRecord.CurrencyCode ;
+			SET outrefJEData.Abs:BaseAmt.Abs:TransactionAmt = COALESCE(inRefMainRecord.BaseAmount,'0');
+			SET outrefJEData.Abs:BaseAmt.Abs:CurrencyCd = inRefMainRecord.CurrencyCode ;
+			SET outrefJEData.Abs:BaseAmt.Abs:CurrencyExchangeRt = COALESCE(TRIM(inRefMainRecord.BaseRate),'1');
+			SET outrefJEData.Abs:ToCompanyBaseAmt.Abs:TransactionAmt = COALESCE(inRefMainRecord.ToBaseAmount,'0');
+			SET outrefJEData.Abs:ToCompanyBaseAmt.Abs:CurrencyCd = inRefMainRecord.CurrencyCode ;
+			SET outrefJEData.Abs:ReportAmt[1].Abs:ReportAmt = COALESCE(inRefMainRecord.RPT_AMOUNT_1,'0');
+			SET outrefJEData.Abs:ReportAmt[1].Abs:ReportRate = inRefMainRecord.RPT_RATE_1;
+			SET outrefJEData.Abs:ReportAmt[1].Abs:ReportND = inRefMainRecord.RPT_ND_1;
+			SET outrefJEData.Abs:ReportAmt[2].Abs:ReportAmt = COALESCE(inRefMainRecord.RPT_AMOUNT_2,'0');
+			SET outrefJEData.Abs:ReportAmt[2].Abs:ReportRate = inRefMainRecord.RPT_RATE_2;
+			SET outrefJEData.Abs:ReportAmt[2].Abs:ReportND = inRefMainRecord.RPT_ND_2;
+			SET outrefJEData.Abs:SegmentBlockTxt = inRefMainRecord.SEGMENT_BLOCK ;
+			
+		PROPAGATE TO TERMINAL 'out' DELETE NONE;
+		SET cmmCount = cmmCount + 1;
+
+	MOVE inRefMainRecord NEXTSIBLING REPEAT TYPE NAME;
+	END; --EXIT Handler
+	END WHILE;
+		
+	IF(cmmCount <> 0) THEN
+		SET Environment.Variables.MISC_DATA = COALESCE(cmmCount,' ');
+		PROPAGATE TO TERMINAL 'out' DELETE NONE;
+	END IF;
+		-- Exception for missing CIC
+IF(FIELDVALUE (Environment.Variables.InvException) IS NOT NULL)
+THEN
+DECLARE exRef REFERENCE TO Environment.Variables.InvException[1];
+DECLARE excptMessage CHAR 'Exception';
+WHILE LASTMOVE(exRef) DO
+SET excptMessage = excptMessage ||' & ' ||exRef;
+MOVE exRef NEXTSIBLING NAME 'InvException';
+END WHILE;
+IF (excptMessage IS NOT NULL) THEN
+THROW USER EXCEPTION VALUES
+('ESED07','Source Data for the XSD mandatory field is not available, Exception Count:'||
+excptMessage);
+END IF;
+END IF;	
+
+IF (Environment.Variables.exception IS NOT NULL) THEN
+	THROW USER EXCEPTION VALUES
+	('Failed:Source Data Unavailability, Exception Count:'||
+	Environment.Variables.exception);
+END IF;
+
+RETURN FALSE;
+END;
+
+CREATE PROCEDURE CopyMessageHeaders() BEGIN
+	DECLARE I INTEGER 1;
+	DECLARE J INTEGER;
+	SET J = CARDINALITY(InputRoot.*[]);
+	WHILE I < J DO
+		SET OutputRoot.*[I] = InputRoot.*[I];
+		SET I = I + 1;
+	END WHILE;
+END;
+
+CREATE PROCEDURE CopyEntireMessage() BEGIN
+	SET OutputRoot = InputRoot;
+END;
+END MODULE;

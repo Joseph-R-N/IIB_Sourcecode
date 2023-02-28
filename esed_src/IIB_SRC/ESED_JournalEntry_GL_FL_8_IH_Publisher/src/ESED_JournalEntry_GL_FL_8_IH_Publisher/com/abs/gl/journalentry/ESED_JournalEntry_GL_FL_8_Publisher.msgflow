@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmFileInput.msgnode="ComIbmFileInput.msgnode" xmlns:com_abs_cmnflows_Audit_Validate_Input.subflow="com/abs/cmnflows/Audit_Validate_Input.subflow" xmlns:com_abs_cmnflows_Audit_Validate_Output.subflow="com/abs/cmnflows/Audit_Validate_Output.subflow" xmlns:com_abs_cmnflows_ExceptionSubFlow.subflow="com/abs/cmnflows/ExceptionSubFlow.subflow" xmlns:com_abs_gl_journalentry_SF_ESED_JournalEntryXML_GL_FL_8_Publisher.subflow="com/abs/gl/journalentry/SF_ESED_JournalEntryXML_GL_FL_8_Publisher.subflow"
+    xmlns:com_ibm_connector_kafka_ComIbmOutput.msgnode="com/ibm/connector/kafka/ComIbmOutput.msgnode" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="com/abs/gl/journalentry/ESED_JournalEntry_GL_FL_8_Publisher.msgflow" nsPrefix="com_abs_gl_journalentry_ESED_JournalEntry_GL_FL_8_Publisher.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.sysEnvCd" name="sysEnvCd" defaultValueLiteral="PROD">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <translation xmi:type="utility:TranslatableString" key="ESED_JournalEntry_GL_FL_8_Publisher" bundleName="com/abs/gl/journalentry/ESED_JournalEntry_GL_FL_8_Publisher" pluginId="ESED_JournalEntry_GL_FL_8_IH_Publisher"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/ESED_JournalEntry_GL_FL_8_IH_Publisher/icons/full/obj16/ESED_JournalEntry_GL_FL_8_Publisher.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/ESED_JournalEntry_GL_FL_8_IH_Publisher/icons/full/obj30/ESED_JournalEntry_GL_FL_8_Publisher.gif"/>
+    <shortDescription xmi:type="utility:ConstantString" string="publisher flow to publish canonical XMLs to target kafka topic"/>
+    <longDescription xmi:type="utility:ConstantString" string="publisher flow to publish canonical XMLs to target kafka topic"/>
+    <composition>
+      <nodes xmi:type="com_abs_cmnflows_ExceptionSubFlow.subflow:FCMComposite_1" xmi:id="FCMComposite_1_2" location="302,180" HOSTNAME="IIBPR" STOREMSG="N" APPLICATIONNAME="ESED_JournalEntry_GL_FL_8_IH_Publisher" BONAME="JournalEntry" INPUTTYPE="FileInput" INPUTNAME="/appl/spool/esed/journalentry/in/" REPLAYRULE="Y" MAXREPLAYCOUNT="3" COMPONENTNAME="ESED_JournalEntry_GL_FL_8_IH_Publisher" queueName="ESEDPR.EXCEPTION.MSG">
+        <translation xmi:type="utility:ConstantString" string="ExceptionSubFlow"/>
+      </nodes>
+      <nodes xmi:type="com_abs_cmnflows_Audit_Validate_Input.subflow:FCMComposite_1" xmi:id="FCMComposite_1_3" location="151,19" APPLICATION_NAME="ESED_JournalEntry_GL_FL_8_IH_Publisher" APPLICATION_DESC="JournalEntry Publisher flow" BO_NAME="JournalEntry" COMPONENT_DESC="JournalEntry Publisher flow" COMPONENT_TYPE="PF" COMPONENT_INPUT_TYPE="FileInput" SOURCE_SYSTEM_NAME="GL" AUDIT_REQD="Y" AUDIT_SRC_UNQ_ID="Y" PATH_SRC_UNQ_ID="CURRENT_TIMESTAMP" AUDIT_TRGT_UNQ_ID="Y" PATH_TRGT_UNQ_ID="CURRENT_TIMESTAMP"
+          VALIDATION_REQD_SOURCE="N" VALIDATION_REQD_TARGET="N" STORE_SRC_MSG="N" STORE_TRGT_MSG="N" COMPONENT_INPUT_NAME="/appl/spool/esed/journalentry/in/" queueName="ESEDPR.AUDIT.MSG">
+        <translation xmi:type="utility:ConstantString" string="Audit_Validate_Input"/>
+      </nodes>
+      <nodes xmi:type="com_abs_cmnflows_Audit_Validate_Output.subflow:FCMComposite_1" xmi:id="FCMComposite_1_6" location="370,17" queueName="ESEDPR.AUDIT.MSG">
+        <translation xmi:type="utility:ConstantString" string="Audit_Validate_Output"/>
+      </nodes>
+      <nodes xmi:type="com_ibm_connector_kafka_ComIbmOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="525,98" connectorName="Kafka" topicName="ESED_C01_JournalEntry" bootstrapServers="zpuw-itka1br01.safeway.com:9095,zpuw-itka1br02.safeway.com:9095,zpuw-itka1br03.safeway.com:9095,zpuw-itka1br04.safeway.com:9095,zpuw-itka1br05.safeway.com:9095,zpuw-itka1br06.safeway.com:9095" clientId="JournalEntry_FL_8" useClientIdSuffix="true" acks="1" timeout="60" securityProtocol="SASL_SSL" sslProtocol="TLSv1.2"
+          securityIdentity="" validateMaster="inherit" validateFailureAction="exception">
+        <translation xmi:type="utility:ConstantString" string="KafkaProducer"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Publishes XML canonicals to target Kafka topic"/>
+        <longDescription xmi:type="utility:ConstantString" string="Publishes XML canonicals to target Kafka topic"/>
+      </nodes>
+      <nodes xmi:type="ComIbmFileInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="70,103" inputDirectory="/appl/spool/esed/journalentry/in/" filenamePattern="*JE_GTR_FL8*.csv" processedFileAction="moveToArchiveWithTimestamp" messageDomainProperty="DFDL" messageTypeProperty="{}:JournalEntryData">
+        <translation xmi:type="utility:ConstantString" string="FileInput"/>
+        <shortDescription xmi:type="utility:ConstantString" string="input node configured with source UNIX directory path to pick source files"/>
+        <longDescription xmi:type="utility:ConstantString" string="input node configured with source UNIX directory path to pick source files"/>
+      </nodes>
+      <nodes xmi:type="com_abs_gl_journalentry_SF_ESED_JournalEntryXML_GL_FL_8_Publisher.subflow:FCMComposite_1" xmi:id="FCMComposite_1_4" location="199,78">
+        <translation xmi:type="utility:ConstantString" string="SF_ESED_JournalEntryXML_GL_FL_8_Publisher"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_1" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.Input"/>
+    </composition>
+    <propertyOrganizer>
+      <propertyDescriptor groupName="Group.Basic" configurable="true" userDefined="true" describedAttribute="Property.sysEnvCd">
+        <propertyName xmi:type="utility:TranslatableString" key="Property.sysEnvCd" bundleName="com/abs/gl/journalentry/SF_ESED_JournalEntryXML_GL_FL_8_Publisher" pluginId="ESED_JournalEntry_GL_FL_8_IH_Publisher"/>
+      </propertyDescriptor>
+    </propertyOrganizer>
+    <attributeLinks promotedAttribute="Property.sysEnvCd" overriddenNodes="FCMComposite_1_4">
+      <overriddenAttribute href="com/abs/gl/journalentry/SF_ESED_JournalEntryXML_GL_FL_8_Publisher.subflow#Property.sysEnvCd"/>
+    </attributeLinks>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

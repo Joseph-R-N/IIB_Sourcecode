@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:ibmDfdlExtn="http://www.ibm.com/dfdl/extensions" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions" xmlns:recSepFieldsFmt="http://www.ibm.com/dfdl/RecordSeparatedFieldFormat">
+    <xsd:import namespace="http://www.ibm.com/dfdl/RecordSeparatedFieldFormat" schemaLocation="../IBMdefined/RecordSeparatedFieldFormat.xsd"/>
+                                <xsd:element dfdl:outputNewLine="%CR;%LF;" dfdl:terminator="" ibmSchExtn:docRoot="true" name="JournalEntryData">
+    <xsd:complexType>
+      <xsd:sequence dfdl:outputNewLine="%CR;%LF;" dfdl:separator="%LF;" dfdl:terminator="">
+        <xsd:element dfdl:outputNewLine="%CR;%LF;" dfdl:terminator="" maxOccurs="unbounded" minOccurs="0" name="JIFINPUTREC" type="JIFINPUTREC"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+    <xsd:complexType name="JIFINPUTREC">
+    <xsd:sequence dfdl:outputNewLine="%CR;%LF;" dfdl:separator="," dfdl:terminator="">
+      <xsd:element dfdl:lengthKind="delimited" dfdl:outputNewLine="%LF;" minOccurs="0" name="RunGroup" type="xsd:string"/>
+                <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="Seq_Number" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="Company" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="oldCompany" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="oldAccrNbr" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="SourceCode" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="Date" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="Reference" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="Description" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="CurrencyCode" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="UnitsAmt" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="TranAmount" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="BaseAmount" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="BaseRate" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="System" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="ProgramCode" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="autoRev" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="PostingDate" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="Activity" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="Acct_Category" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="runGroup2" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="ToBaseAmount" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="EffectDate" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="JRNLBookNbr" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="MX_VALUE1" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="MX_VALUE2" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="MX_VALUE3" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="JBK_SEQ_NBR" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="NEGATIVE_ADJ" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="SEGMENT_BLOCK" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="RPT_AMOUNT_1" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="RPT_RATE_1" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="RPT_ND_1" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="RPT_AMOUNT_2" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" minOccurs="0" name="RPT_RATE_2" type="xsd:string"/>
+            <xsd:element dfdl:lengthKind="delimited" dfdl:outputNewLine="%CR;%LF;" minOccurs="0" name="RPT_ND_2" type="xsd:string"/>
+                    <xsd:element minOccurs="0" name="Filler" type="xsd:string"/>
+        </xsd:sequence>
+  </xsd:complexType>
+        <xsd:annotation>
+		<xsd:appinfo source="http://www.ogf.org/dfdl/">
+			<dfdl:format encoding="{$dfdl:encoding}" escapeSchemeRef="" occursCountKind="implicit" ref="recSepFieldsFmt:RecordSeparatedFieldsFormat"/>
+		</xsd:appinfo>
+	</xsd:annotation>
+
+
+</xsd:schema>

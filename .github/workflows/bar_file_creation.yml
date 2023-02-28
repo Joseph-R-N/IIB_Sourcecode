@@ -24,8 +24,18 @@ jobs:
          pwd
          ls -alrt
          echo "The GitHub Repo Name is: ${{ github.event.repository.name }}"
-         echo "The GitHub Repo Name is: ${GITHUB_REPOSITORY}"
          echo "The selected input variable is: ${{ github.event.inputs.flow_name }}"
-         echo "The Branch info: ${GITHUB_REF}"
-         echo "The Branch info: ${GITHUB_REF_NAME}"
          echo "The Branch info: ${{ github.ref_name }}"
+         echo "The Working Directory info: ${GITHUB_WORKSPACE}"
+
+  bar_file_creation:
+    runs-on: [iibtest-01]
+    needs: checkout_SCM
+    steps:
+      - name: create_barfile
+        run: |
+          pwd
+          cd ${GITHUB_WORKSPACE}
+          pwd
+          ls -lrt
+          mkdir tmp && cd tmp

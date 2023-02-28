@@ -1,0 +1,55 @@
+BROKER SCHEMA com.abs.gl.journalentry
+
+
+CREATE COMPUTE MODULE SF_JournalEntry_FL_8_Header_Trailer_RemovaL
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyMessageHeaders();
+		--DECLARE Str BLOB CAST('H,' AS BLOB CCSID 1208);
+		DECLARE hdr CHARACTER CAST(X'482C' AS CHAR CCSID 1208);--HEADER OF M3/IS/NM FILE IS 'H,'
+		DECLARE hdr1 CHARACTER CAST(X'535754566572' AS CHAR CCSID 1208);--HEADER OF EAS FILES IS 'SWTVer'
+		DECLARE hdr2 CHARACTER CAST(X'557365723D' AS CHAR CCSID 1208);--HEADER OF MD FILES IS 'User='
+		DECLARE trlr CHARACTER CAST( X'0A542C' AS CHAR CCSID 1208);--as per 'LF' with 'T,'
+		DECLARE charMsg CHAR CAST(InputRoot.BLOB.BLOB AS CHAR ENCODING InputRoot.Properties.Encoding);
+		
+		DECLARE len INTEGER LENGTH(charMsg);
+		DECLARE lenHdr INTEGER POSITION(CAST( X'0A' AS CHAR CCSID 1208) IN charMsg);--'LF' is '0A', 'CR' is '0D'
+		DECLARE posTrlr INTEGER POSITION(trlr IN charMsg);
+		
+		--Remove the Trailer Line
+		DECLARE trlrInRcord CHARACTER SUBSTRING(charMsg FROM posTrlr FOR 3); --4 for 'CRLFT,', 3 IS FOR 'LFT,' 
+		IF (trlrInRcord=trlr) THEN
+			SET charMsg = OVERLAY(charMsg PLACING '' 
+						FROM posTrlr FOR (len-posTrlr+1));
+		END IF;
+		
+		--Remove the Header Line
+		DECLARE hdrInRcord CHARACTER SUBSTRING(charMsg FROM 1 FOR 2);
+		DECLARE hdrInRcord1 CHARACTER SUBSTRING(charMsg FROM 1 FOR 6);
+		DECLARE hdrInRcord2 CHARACTER SUBSTRING(charMsg FROM 1 FOR 5);
+		IF (hdrInRcord=hdr) OR (hdrInRcord1=hdr1) OR (hdrInRcord2=hdr2) THEN
+			SET charMsg = OVERLAY(charMsg PLACING '' 
+						FROM 1 FOR lenHdr+1);
+		END IF;
+		
+		-- Casting back to Blob to propagate
+		SET OutputRoot.BLOB.BLOB = CAST(charMsg AS BLOB CCSID 1208);
+		PROPAGATE TO TERMINAL 'out' DELETE NONE;
+		
+		RETURN FALSE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;

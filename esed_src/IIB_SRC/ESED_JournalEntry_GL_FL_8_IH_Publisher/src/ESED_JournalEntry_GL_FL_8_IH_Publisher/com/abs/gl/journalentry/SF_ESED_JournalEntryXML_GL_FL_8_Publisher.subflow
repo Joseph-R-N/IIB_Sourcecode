@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" 
+xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" 
+xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="com/abs/gl/journalentry/SF_ESED_JournalEntryXML_GL_FL_8_Publisher.subflow" 
+nsPrefix="com_abs_gl_journalentry_SF_ESED_JournalEntryXML_GL_FL_8_Publisher.subflow">
+<eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1" useDefaults="true" udpSupport="true">
+<eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+<eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.sysEnvCd" name="sysEnvCd" >
+  <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+</eStructuralFeatures>
+<translation xmi:type="utility:TranslatableString" key="SF_ESED_JournalEntryXML_GL_FL_8_Publisher" bundleName="com/abs/gl/journalentry/SF_ESED_JournalEntryXML_GL_FL_8_Publisher" pluginId="flowAPIgenerated"/>
+<colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/flowAPIgenerated/icons/full/obj16/SF_ESED_JournalEntryXML_GL_FL_8_Publisher.gif"/>
+<colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/flowAPIgenerated/icons/full/obj30/SF_ESED_JournalEntryXML_GL_FL_8_Publisher.gif"/>
+<shortDescription xmi:type="utility:ConstantString" string="creates canonical XML for each of the file record from source file"/>
+<longDescription xmi:type="utility:ConstantString" string="creates canonical XML for each of the file record from source file"/>
+<composition>
+<nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input" location="56,54">
+<translation xmi:type="utility:TranslatableString" key="InTerminal.Input" bundleName="com/abs/gl/journalentry/SF_ESED_JournalEntryXML_GL_FL_8_Publisher" pluginId="flowAPIgenerated"/>
+</nodes>
+<nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output" location="369,55">
+<translation xmi:type="utility:TranslatableString" key="OutTerminal.Output" bundleName="com/abs/gl/journalentry/SF_ESED_JournalEntryXML_GL_FL_8_Publisher" pluginId="flowAPIgenerated"/>
+</nodes>
+<nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="177,54" computeExpression="esql://routine/com.abs.gl.journalentry#SF_ESED_JournalEntryXML_GL_FL_8_Publisher_Compute.Main">
+<translation xmi:type="utility:ConstantString" string="CMM_transformation"/>
+<shortDescription xmi:type="utility:ConstantString" string="creates canonical XMLs"/>
+<longDescription xmi:type="utility:ConstantString" string="creates canonical XMLs"/>
+</nodes>
+<connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="OutTerminal.Output" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+<connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_2" sourceNode="InTerminal.Input" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+</composition>
+<propertyOrganizer>
+<propertyDescriptor groupName="Group.Basic" configurable="true" userDefined="true" describedAttribute="Property.sysEnvCd">
+<propertyName xmi:type="utility:TranslatableString" key="Property.sysEnvCd" bundleName="com/abs/gl/journalentry/SF_ESED_JournalEntryXML_GL_FL_8_Publisher" pluginId="flowAPIgenerated"/>
+</propertyDescriptor>
+</propertyOrganizer>
+<stickyBoard/>
+</eClassifiers>
+</ecore:EPackage>

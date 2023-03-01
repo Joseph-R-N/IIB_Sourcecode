@@ -58,15 +58,14 @@ jobs:
           cd ${GITHUB_WORKSPACE}/tmp
           cp ./${{ github.event.inputs.flow_name }}.bar ${GITHUB_WORKSPACE}/esed_std/ESEDA/
           echo "${{ github.event.inputs.flow_name }}.bar file is moved to the ESEDA Folder..."
+          ls -a
           cd ${GITHUB_WORKSPACE}
           git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git"
-          git config user.email "mqsi@bot.com"
-          git config user.name "${GITHUB_ACTOR}"
+          git add -A
+          git commit -m "Commit bar ${{ github.event.inputs.flow_name }}.bar file"
           git fetch
           git checkout ${{ github.ref_name }}
           git branch --set-upstream-to=origin/${{ github.ref_name }}
           git pull
           ls -a
-          git add -A
-          git commit -m "Commit bar ${{ github.event.inputs.flow_name }}.bar file"
           git push

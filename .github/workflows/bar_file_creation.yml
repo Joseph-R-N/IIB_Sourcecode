@@ -34,6 +34,9 @@ jobs:
     steps:
       - name: create_barfile
         run: |
+          echo "you are running as $(whoami) User"
+          cd /home/jnell16/ace-12.0.7.0/server/bin
+          . mqsiprofile
           cd ${GITHUB_WORKSPACE}
           mkdir tmp && cd tmp
           pwd

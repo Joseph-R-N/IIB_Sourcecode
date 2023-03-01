@@ -31,6 +31,10 @@ jobs:
   bar_file_creation:
     runs-on: [iibtest-01]
     needs: checkout_SCM
+    permissions:
+      issues: write
+      contents: write
+      packages: write
     steps:
       - name: create_barfile
         run: |
@@ -43,3 +47,30 @@ jobs:
           ls -lrt
           xvfb-run --auto-servernum --server-num=1 /home/jnell16/ace-12.0.7.0/tools/mqsicreatebar -data . -b ${{ github.event.inputs.flow_name }}.bar -a ${{ github.event.inputs.flow_name }} -skipWsErrorCheck -deployAsSource -trace
           ls -lrt
+      
+      - name: read_created_barfile
+        run: |
+          cd ${GITHUB_WORKSPACE}/tmp
+          /home/jnell16/ace-12.0.7.0/server/bin/mqsireadbar -b ${{ github.event.inputs.flow_name }}.bar -r
+      
+      - name: Upload_barfile_Github
+        run: |
+          cd ${GITHUB_WORKSPACE}/tmp
+          mkdir repo && cd repo
+          git init
+          git remote add origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git"
+          git config user.email "mqsi@bot.com"
+          git config user.name "mqsi"
+          git fetch
+          git checkout ${{ github.ref_name }}
+          git branch --set-upstream-to=origin/${{ github.ref_name }}
+          git pull
+          ls -a
+          cp ${GITHUB_WORKSPACE}/tmp/${{ github.event.inputs.flow_name }}.bar ${GITHUB_WORKSPACE}/esed_std/ESEDA/
+          echo "${{ github.event.inputs.flow_name }}.bar file is moved to the ESEDA Folder..."
+          ls -a
+          git add -A
+          git commit -m "Commit bar ${{ github.event.inputs.flow_name }}.bar file"
+          git push
+
+

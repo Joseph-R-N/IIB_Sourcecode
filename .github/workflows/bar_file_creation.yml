@@ -100,4 +100,4 @@ jobs:
       - name: Clean_Up
         run: |
           cd ${GITHUB_WORKSPACE}
-          rm -rf * && rm -f *.*
+          rm -rf * && rm -f *.git*

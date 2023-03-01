@@ -41,6 +41,5 @@ jobs:
           cp -R ${GITHUB_WORKSPACE}/esed_src/IIB_COMMON_LIB/EDIS* .
           cp -R ${GITHUB_WORKSPACE}/esed_src/IIB_SRC/${{ github.event.inputs.flow_name }}/src/* .
           ls -lrt
-          /usr/bin/Xvfb :99 -screen 0 800x600x24&
-          /home/jnell16/ace-12.0.7.0/tools/mqsicreatebar -data . -b ${{ github.event.inputs.flow_name }}.bar -a ${{ github.event.inputs.flow_name }} -skipWsErrorCheck -deployAsSource -trace
+          xvfb-run --auto-servernum --server-num=1 /home/jnell16/ace-12.0.7.0/tools/mqsicreatebar -data . -b ${{ github.event.inputs.flow_name }}.bar -a ${{ github.event.inputs.flow_name }} -skipWsErrorCheck -deployAsSource -trace
           ls -lrt

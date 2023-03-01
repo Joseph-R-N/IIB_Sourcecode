@@ -41,5 +41,6 @@ jobs:
           cp -R ${GITHUB_WORKSPACE}/esed_src/IIB_COMMON_LIB/EDIS* .
           cp -R ${GITHUB_WORKSPACE}/esed_src/IIB_SRC/${{ github.event.inputs.flow_name }}/src/* .
           ls -lrt
+          source /home/jnell16/.profile
           mqsicreatebar -data . -b ${{ github.event.inputs.flow_name }}.bar -a ${{ github.event.inputs.flow_name }} -skipWsErrorCheck -deployAsSource -trace
           ls -lrt

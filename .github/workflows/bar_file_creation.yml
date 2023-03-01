@@ -56,21 +56,17 @@ jobs:
       - name: Upload_barfile_Github
         run: |
           cd ${GITHUB_WORKSPACE}/tmp
-          mkdir repo && cd repo
-          git init
+          cp ./${{ github.event.inputs.flow_name }}.bar ${GITHUB_WORKSPACE}/esed_std/ESEDA/
+          echo "${{ github.event.inputs.flow_name }}.bar file is moved to the ESEDA Folder..."
+          cd ${GITHUB_WORKSPACE}
           git remote add origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git"
           git config user.email "mqsi@bot.com"
-          git config user.name "mqsi"
+          git config user.name "${GITHUB_ACTOR}"
           git fetch
           git checkout ${{ github.ref_name }}
           git branch --set-upstream-to=origin/${{ github.ref_name }}
           git pull
           ls -a
-          cp /home/jnell16/workspace/IIB_Sourcecode/IIB_Sourcecode/tmp/${{ github.event.inputs.flow_name }}.bar /home/jnell16/workspace/IIB_Sourcecode/IIB_Sourcecode/tmp/repo/esed_std/ESEDA
-          echo "${{ github.event.inputs.flow_name }}.bar file is moved to the ESEDA Folder..."
-          ls -a
           git add -A
           git commit -m "Commit bar ${{ github.event.inputs.flow_name }}.bar file"
           git push
-
-

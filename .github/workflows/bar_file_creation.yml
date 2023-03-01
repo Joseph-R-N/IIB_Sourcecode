@@ -92,3 +92,12 @@ jobs:
           else
             zip -r ${{ github.event.inputs.flow_name }}.zip ESEDA ESEDB
           fi
+
+  Clean_Up:
+    runs-on: [iibtest-01]
+    needs: Package_Creation_Upload
+    steps:
+      - name: Clean_Up
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          rm -rf *
